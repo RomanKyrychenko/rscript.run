@@ -24,7 +24,7 @@ navbar:
           href: page_d.html
   right:
     - icon: fa-question fa-lg
-      href: https://example.com
+      href: https://github.com/RomanKyrychenko
 output:
   html_document:
     theme: cosmo
