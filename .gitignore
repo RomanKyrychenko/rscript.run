@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .Rproj.user
 .Rhistory
 .RData
@@ -5,3 +6,16 @@
 crop3.gif
 crop.gif
 crop2.gif
+=======
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+crop.gif
+crop2.gif
+crop3.gif
+map3g_upd2.svg
+output.gif
+resize.gif
+resize2.gif
+>>>>>>> e155badbe3658500f9dfa2611c04b2d7c99b7bf6
