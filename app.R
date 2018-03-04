@@ -15,9 +15,7 @@ if (interactive()) {
       tags$head(tags$style(HTML(css_style))),
       basicPage(conditionalPanel(condition="input.country.length>1",selectInput("country", "", categories))),
       conditionalPanel(condition="input.country=='Природний рух населення'", uiOutput("part2")),
-      actionButton("show", "Show modal dialog"),
-      radioButtons("filetype", "File type:", choices = c("csv", "tsv")),
-      downloadButton('downloadData', 'Download')),
+      actionButton("show", "Show modal dialog")),
     server = function(input, output, session) {
       output$part2 <- renderUI({
         navbarPage(title = "ukrdata.com",
@@ -43,27 +41,23 @@ if (interactive()) {
           )
         )
         })
-      observe({if(input$country=="Природний рух населення"){
+      observe({if(input$country == "Природний рух населення"){
         hide("country")
         js$pageCol()
       }})
       observeEvent(input$show, {
         showModal(modalDialog(
-          title = "Important message",
-          "This is an important message!", easyClose = TRUE, footer = NULL
+          title = "Important message", "This is an important message!", easyClose = TRUE, footer = NULL
         ))
       })
       vals <- reactiveValues(data = NULL)
-      
-      # Return the UI for a modal dialog with data selection input. If 'failed' is
-      # TRUE, then display a message that the previous value was invalid.
+
       dataModal <- function(failed = FALSE) {
         modalDialog(
-          textInput("dataset", "Choose data set",
-                    placeholder = 'Try "mtcars" or "abc"'
-          ),
+          selectInput("format", "Оберіть формат даних", choices = c("xlsx", "csv", "json")),
           span('(Try the name of a valid data object like "mtcars", ',
                'then a name of a non-existent object like "abc")'),
+          downloadButton('downloadData', 'Download'),
           if (failed) div(tags$b("Invalid name of data object", style = "color: red;")),
           
           footer = tagList(
@@ -76,23 +70,23 @@ if (interactive()) {
         showModal(dataModal())
       })
       observeEvent(input$ok, {
-        if (!is.null(input$dataset) && nzchar(input$dataset) &&
-            exists(input$dataset) && is.data.frame(get(input$dataset))) {
-          vals$data <- get(input$dataset)
+        #if (!is.null(input$format) && nzchar(input$format) &&
+        #    exists(input$format) && is.data.frame(peoples)) {
+          vals$data <- peoples
           removeModal()
-        } else {
-          showModal(dataModal(failed = TRUE))
-        }
+        #} else {
+        #  showModal(dataModal(failed = TRUE))
+        #}
       })
         output$distPlot <- renderPlot({
-          ggplot(peoples,aes(Область,постійне)) + geom_bar(stat = "identity") + coord_flip() +
+          ggplot(peoples, aes(Область, постійне)) + geom_bar(stat = "identity") + coord_flip() +
             theme_minimal() + theme(
-              text=element_text(family="PT Sans"),
+              text=element_text(family = "PT Sans"),
               legend.position = "bottom",
               panel.grid.minor = element_blank(),
-              panel.grid.major = element_line(linetype = "dashed",size = .05, color="grey"),
-              axis.title.y = element_text(family="PT Sans",size = 16),
-              axis.text = element_text(family="PT Sans",size = 14)
+              panel.grid.major = element_line(linetype = "dashed", size = .05, color="grey"),
+              axis.title.y = element_text(family = "PT Sans", size = 16),
+              axis.text = element_text(family = "PT Sans", size = 14)
             )
         })
         output$Plot <- renderPlot({
@@ -102,13 +96,19 @@ if (interactive()) {
           peoples$наявне <- as.numeric(peoples$наявне)
           plot(peoples$постійне,peoples$наявне)
         })
+        output$dataInfo <- renderPrint({
+          if (is.null(vals$data))
+            "No data selected"
+          else
+            summary(vals$data)
+        })
         
         output$downloadData <- downloadHandler(
           filename = function() {
-            paste(peoples, input$filetype, sep = ".")
+            paste(peoples, input$format, sep = ".")
           },
           content = function(file) {
-            sep <- switch(input$filetype, "csv" = ",", "tsv" = "\t")
+            sep <- switch(input$format, "csv" = ",", "tsv" = "\t")
             write.table(peoples, file, sep = sep, row.names = FALSE)
           }
         )
